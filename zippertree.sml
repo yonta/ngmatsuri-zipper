@@ -72,6 +72,7 @@ struct
 
 end
 
+(* test code *)
 open ZipperTree
 val getPrint = print o (fn s => s ^ "\n") o Int.toString o valOf o get
 val tree = fromList (op <=) [4, 2, 3, 0, 1]
@@ -83,3 +84,4 @@ val () = (getPrint o goRight o goUp o goLeft) ztree
 val () = (getPrint o goRight o goRight o goUp o goLeft) ztree
 val () = (getPrint o goUp o goRight o goRight o goUp o goLeft) ztree
 val () = (getPrint o goLeft o goUp o goRight o goRight o goUp o goLeft) ztree
+val () = (getPrint o (set 5) o goLeft o goUp o goRight o goRight o goUp o goLeft) ztree
