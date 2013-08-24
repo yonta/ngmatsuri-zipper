@@ -30,10 +30,11 @@ structure ZipperTree :>
 
             val fromList : ('a * 'a -> bool) -> 'a list -> 'a tree
             val toZipper : 'a tree -> 'a zippertree
-
             val goUp : 'a zippertree -> 'a zippertree
             val goLeft : 'a zippertree -> 'a zippertree
             val goRight : 'a zippertree -> 'a zippertree
+            val jumpLeft : 'a zippertree -> 'a zippertree
+            val jumpRight : 'a zippertree -> 'a zippertree
             val set : 'a -> 'a zippertree -> 'a zippertree
             val get : 'a zippertree -> 'a option
           end
@@ -46,6 +47,10 @@ struct
                    | Left of 'a * 'a tree * 'a path
   type 'a zippertree = 'a tree * 'a path
 
+  (*
+   * for test
+   *  The "fromList" makes ordered tree from list, not balanced.
+   *)
   fun insert leq v Leaf = Node (v, Leaf, Leaf)
     | insert leq v (Node (v', left, right)) =
       if leq (v, v')
@@ -53,22 +58,27 @@ struct
       else Node (v', left, insert leq v right)
   fun fromList leq nil = Leaf
     | fromList leq (h::t) = insert leq h (fromList leq t)
+
   fun toZipper tree = (tree, Top) : 'a zippertree
+
   fun goUp (_, Top) = raise Fail "top of goUp"
     | goUp (tree, Right (v, left, path)) = (Node (v, left, tree), path)
     | goUp (tree, Left (v, right, path)) = (Node (v, tree, right), path)
-  (* fun goDown (Leaf, _) = raise Fail "leaf of goDown" *)
-  (*   | goDown (Node (left =  *)
   fun goLeft (Leaf, _) = raise Fail "leaf of goLeft"
     | goLeft (Node (v, left, right), path) = (left, Left (v, right, path))
   fun goRight (Leaf, _) = raise Fail "leaf of goLeft"
     | goRight (Node (v, left, right), path) = (right, Right (v, left, path))
+  fun jumpLeft (tree, Right (v, left, path)) = (left, Left (v, tree, path))
+    | jumpLeft (_, Left _) = raise Fail "left of jumpLeft"
+    | jumpLeft (_, Top) = raise Fail "top of jumpLeft"
+  fun jumpRight (tree, Left (v, right, path)) = (right, Right (v, tree, path))
+    | jumpRight (_, Right _) = raise Fail "right of jumpRight"
+    | jumpRight (_, Top) = raise Fail "top of jumpRight"
+
   fun set v (Leaf, path) = (Node (v, Leaf, Leaf), path)
     | set v (Node (_, right, left), path) = (Node (v, right, left), path)
   fun get (Leaf, _) = NONE
     | get (Node (v, _ , _), _) = SOME v
-  (* fun zinsert v (Leaf, path) = (Node (v, Leaf, Leaf), path) *)
-  (*   | zinsert v (Node (v', right, left), path) = (Node (v, right, left), path) *)
 
 end
 
